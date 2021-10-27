@@ -1,13 +1,13 @@
 --Made by Zaid 2021 (azaidrahman@gmail.com)
 
 --SETTINGS
-pipe_from_others    = true               -- Piping previous input from others into current question ( true / false )           
+pipe_from_others    = false               -- Piping previous input from others into current question ( true / false )           
 jump_if_only_one    = false              -- Autocode the answer if theres only one and jump into next question (if true enter the page id inside PAGES_ID) ( true / false )           
 term_if_only_others = false               -- Terminate if theres only others answered ( true / false )
 push_others_next    = false              -- Current Others being specified will be considered as answer for next question and can be autocoded ( true / false )      
 PIPE_TYPE           = 0                  -- Refer to PIPE_TYPE below to associate what function you want to apply in current question         
-pipe_row            = true               -- If you are piping to current table, are you piping to row? if yes Refer NOTE 1.0 ( true / false )
-pipe_column         = true              -- If you are piping to current table, are you piping to column? if yes Refer NOTE 1.0 ( true / false )
+pipe_row            = false               -- If you are piping to current table, are you piping to row? if yes Refer NOTE 1.0 ( true / false )
+pipe_column         = false              -- If you are piping to current table, are you piping to column? if yes Refer NOTE 1.0 ( true / false )
 from_grid           = false              -- Can ignore for now
 -- grid_pipe_from_others   = false       -- Piping previous input from others into current question ( true / false )           
 -- MAX_SEQ             = 99              -- Maximum number of possible sequence, for example 99 is none of the above, thus it is max (not important yet)
@@ -92,8 +92,6 @@ EXCLUDE_OPTIONS = {
 MAIN_QUESTION_TYPES = {
     "CHECKBOX","RADIO","TABLE","RANK"
 }
-
-
 
 ------------------------------------
 

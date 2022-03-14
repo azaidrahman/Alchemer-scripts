@@ -7,8 +7,8 @@ jump_if_only_one    = false              -- Autocode the answer if theres only o
 term_if_only_others = true               -- Terminate if theres only others answered ( true / false )
 
 --FOR GRID QUESTIONS
-pipe_row            = true              -- If you are piping to target table and piping into rows
-pipe_column         = true              -- If you are piping to target table and piping into columns
+pipe_row            = false              -- If you are piping to target table and piping into rows
+pipe_column         = false              -- If you are piping to target table and piping into columns
 
 -- NOTE: CHECKBOX/RADIO = MCQ
 -- PIPE_TYPE = {

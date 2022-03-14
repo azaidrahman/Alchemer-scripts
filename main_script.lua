@@ -33,6 +33,7 @@ function main()
     -- NOTE 1.0: IF PIPING GRID, BY DEFAULT source_id REFERS TO THE ROWS, IF YOU WANT TO PIPE INTO COLUMNS, PUT ID IN SECONDARY_SOURCE_ID
     
     -- VARIABLES
+    -- TODO: if only referencing column, default into source_id, then if both row and column only then use secondary
     source_id           = {221} 
     target_id           = {118}
     secondary_source_id = {}
@@ -232,9 +233,10 @@ end
 --IF ITS ONLY OTHERS THEN SKIP TO TERMINATE (has to be an array)
 function terminate_if_only_others(source_id,others_answer,source_answer,pages)
     
+    local c = false
+    
     if term_if_only_others == false or others_answer == nil then return end
     
-    c = false
     -- THIS IS WHEN ITS A SINGLE ANSWER THEREFORE THE SOURCE ANSWER IS THE SAME AS OTHER ANSWER
     if source_answer == others_answer then c = true end
 
@@ -286,7 +288,7 @@ end
 
 -- INITIALIZE THE PAGES STRING INTO AN ARRAY
 function page_maker()
-    pages = {}
+    local pages = {}
 
     for line in PAGES_ID:gmatch("(.-)\n") do
         page_title = nil
@@ -309,7 +311,7 @@ function page_maker()
 end
 
 function question_type_func(pageid)
-    question_types = {}
+    local question_types = {}
     for _,types in pairs(MAIN_QUESTION_TYPES) do
         question_types[types] = allquestionsoftype(types,pageid)
     end
@@ -329,8 +331,8 @@ function between(num, a, b)
 end 
 
 function multi_compare(c,...)
-    rst = false
-    ans = arg[1]
+    local rst = false
+    local ans = arg[1]
    
     if c == true then
         if ans >= arg[2] and ans <= arg[3] then
@@ -352,7 +354,7 @@ function multi_compare(c,...)
 end
 
 function cmp_multitype(op1, op2)
-    type1, type2 = type(op1), type(op2)
+    local type1, type2 = type(op1), type(op2)
     if type1 ~= type2 then --cmp by type
         return type1 < type2
     elseif type1 == "number" or type1 == "string" then --type2 is equal to type1
@@ -365,7 +367,7 @@ function cmp_multitype(op1, op2)
 end
 
 function __genOrderedIndex( t )
-    orderedIndex = {}
+    local orderedIndex = {}
     for key in pairs(t) do
         table.insert( orderedIndex, key )
     end
@@ -374,7 +376,7 @@ function __genOrderedIndex( t )
 end
 
 function orderedNext(t, state)
-     key = nil
+    local key = nil
     --print("orderedNext: state = "..tostring(state) )
     if state == nil then
         -- the first time, generate the index
@@ -403,7 +405,7 @@ function orderedPairs(t)
 end
 
 function recurs_merge(...)
-	arr = {}
+	local arr = {}
   	for i = 1, #arg do
     	arr = array_merge(arr,arg[i])
     end

@@ -10,14 +10,7 @@ term_if_only_others = true               -- Terminate if theres only others answ
 pipe_row            = false              -- If you are piping to target table and piping into rows
 pipe_column         = false              -- If you are piping to target table and piping into columns
 
--- NOTE: CHECKBOX/RADIO = MCQ
--- PIPE_TYPE = {
---     ["MCQ -> MCQ"]     = 0, #DONE
---     ["MCQ -> grid"]    = 1, #DONE
---     ["grid -> grid"]   = 2, 
---     ["grid -> MCQ"]    = 3,
--- 	   ["sandbox"]       = 99,
--- }
+-- MCQ -> MCQ : 1 || MCQ -> grid : 2 || grid -> grid : 3 || grid -> MCQ : 4 || sandbox : 99
 
 others_text = "other"
 

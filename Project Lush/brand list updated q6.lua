@@ -1,4 +1,4 @@
---Update brand list - skip Q7-Q9 - milk type init
+--PROJECT LUSH Update brand list - skip Q7-Q9 - milk type init
 
 s = 865 -- Q6
 t = 193 -- C+B DATA

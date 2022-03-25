@@ -6,9 +6,13 @@ pipe_from_others    = false              -- Piping previous input from others in
 jump_if_only_one    = false              -- Autocode the answer if theres only one and jump into next question (if true enter the page id inside PAGES_ID) ( true / false )           
 term_if_only_others = true               -- Terminate if theres only others answered ( true / false )
 
---FOR GRID QUESTIONS
+--FOR GRID QUESTIONS (CODE:1)
 pipe_row            = false              -- If you are piping to target table and piping into rows
 pipe_column         = false              -- If you are piping to target table and piping into columns
+
+--FOR GRID TO GRID (CODE:2)
+requirement = 3
+greaterThan = true
 
 -- MCQ -> MCQ : 0 || MCQ -> grid : 1 || grid -> grid : 2 || grid -> MCQ : 3 || sandbox : 99
 
@@ -26,7 +30,7 @@ function main()
     local target_id           = 11
     secondary_source_id       = 9
 
-    from_grid = pipe_column and true or false --ternary operator for lua basically meaning if pipe_column is true then this variable is true else false
+    from_grid = pipe_column and true or false --ternary operator for lua, basically meaning if pipe_column is true then this variable is true else false
     ------------------------------------------------------------
     
     pages = page_maker()
@@ -180,25 +184,21 @@ function pipe_grid_to_grid(source_id,target_id)
     local source_title = array_flip(gettablequestiontitles(source_id)) or print("ERROR CODE 2.2")
     local target_title = array_flip(gettablequestiontitles(target_id)) or print("ERROR CODE 2.3")
 
-    local requirement = 5
-    local greaterThan = true
 
     for key,row_id in pairs(target_title)do
         sa_title = source_answer[source_title[key]] or print("ERROR CODE 2.4")
+        hidequestion(row_id,true)
         if table_exists(sa_title) then
             for _,rval in pairs(sa_title)do
-                rval = tonumber(rval)
+                rval = tonumber(rval) or print"ERROR CODE 2.5"
                 if greaterThan and rval >= requirement then
-                    hidequestion(row_id,true)
-                else rval <= requirement then
-                    hidequestion(row_id,true)
+                    hidequestion(row_id,false)
+                elseif not(greaterThan) and rval <= requirement then
+                    hidequestion(row_id,false)
                 end
             end
-        else
-            hidequestion(row_id,true)
         end
     end
-
 end
 
 --IF ITS ONLY OTHERS THEN SKIP TO TERMINATE (has to be an array)

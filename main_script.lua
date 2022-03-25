@@ -10,9 +10,9 @@ term_if_only_others = true               -- Terminate if theres only others answ
 pipe_row            = false              -- If you are piping to target table and piping into rows
 pipe_column         = false              -- If you are piping to target table and piping into columns
 
--- MCQ -> MCQ : 1 || MCQ -> grid : 2 || grid -> grid : 3 || grid -> MCQ : 4 || sandbox : 99
+-- MCQ -> MCQ : 0 || MCQ -> grid : 1 || grid -> grid : 2 || grid -> MCQ : 3 || sandbox : 99
 
-others_text = "other"
+
 
 PAGES_ID = [[
     next 46
@@ -26,8 +26,7 @@ function main()
     local target_id           = 11
     secondary_source_id       = 9
 
-    from_grid = false
-    if pipe_column then from_grid = true end
+    from_grid = pipe_column and true or false --ternary operator for lua basically meaning if pipe_column is true then this variable is true else false
     ------------------------------------------------------------
     
     pages = page_maker()
@@ -38,7 +37,11 @@ function main()
         pipe_mcq_to_mcq(source_id, target_id)
     elseif PIPE_TYPE == 1 then
         pipe_mcq_to_grid(source_id, target_id)
-	elseif PIPE_TYPE == 99 then
+	elseif PIPE_TYPE == 2 then
+        pipe_grid_to_grid(source_id,target_id)
+    elseif PIPE_TYPE == 3 then
+        pipe_grid_to_mcq(source_id,target_id)
+    elseif PIPE_TYPE == 99 then
         sandbox(source_id,target_id)
     end
 
@@ -51,6 +54,7 @@ EXCLUDE_OPTIONS = {
     ["none"]   = '99'                               
 }
 MAIN_QUESTION_TYPES = {"CHECKBOX","RADIO","TABLE","RANK"}
+others_text = "other"
 
 ------------------------------------
 
@@ -74,10 +78,10 @@ function pipe_mcq_to_mcq(source_id,target_id)
     --SEPARATE OTHERS TO RESOLVE EDGE CASE OF OTHERS BEING A NUMBER AND CONSIDERED AS REPORTING VALUE
     -- For checkbox
     if source_type == "table" then 
-        source_answer = getvalue(source_id)
+        source_answer = getvalue(source_id) or print("ERROR CODE 0.1")
         for k,v in pairs(source_answer)do
             -- IF SOURCE IS FROM A RAW OTHERS INPUT
-            if string.find(k,"other") then
+            if string.find(k,others_text) then
                 others_answer = v
                 others_key = string.gsub(k,"-other","")
                 source_answer[k] = nil --table.remove(source_answer,k)
@@ -90,7 +94,7 @@ function pipe_mcq_to_mcq(source_id,target_id)
             end
         end
     else -- For radiobutton
-        local source_title = strip(getvaluelabel(source_id))
+        local source_title = strip(getvaluelabel(source_id))  or print("ERROR CODE 0.2")
         if string.find(source_title,others_text) then
             others_answer = getvalue(source_id)
         end
@@ -145,25 +149,20 @@ function pipe_mcq_to_grid(source_id,target_id)
     if (type(source_id) ~= 'number' or type(secondary_source_id) ~= 'number') and type(target_id) ~= 'number' then return end
 
     others_answered = false
-    local target_options = array_flip(gettablequestiontitles(target_id))
+    local target_options = array_flip(gettablequestiontitles(target_id)) or print("ERROR CODE 1.1")
 
-    local src_ans, src_ans_label     = source(source_id)
-    local sec_src_ans, sec_ans_label = source(secondary_source_id)
-
-    
+    local src_ans, src_ans_label     = source(source_id) or print("ERROR CODE 1.2")
+    local sec_src_ans, sec_ans_label = source(secondary_source_id) or print("ERROR CODE 1.3")
 
     --------------------------------------------------------------------
     for row_title,row_id in pairs(target_options)do
         if pipe_row then
-            row_title = strip(row_title)
+            row_title = strip(row_title) or print("ERROR CODE 1.4")
             hidequestion(row_id,true)
             if in_array(row_title,src_ans_label) then
                 hidequestion(row_id,false)
             end
 
-            if string.find(row_title,[[id=]]) and others_answered then -- TODO: how will it know others answered
-                hidequestion(row_id,false)
-            end
         end
         --TODO: make an array of id's of rows that passed 
         if pipe_column then
@@ -174,14 +173,36 @@ function pipe_mcq_to_grid(source_id,target_id)
             end
         end
     end
+end
 
-    
+function pipe_grid_to_grid(source_id,target_id)
+    local source_answer = getvalue(source_id) or print("ERROR CODE 2.1")
+    local source_title = array_flip(gettablequestiontitles(source_id)) or print("ERROR CODE 2.2")
+    local target_title = array_flip(gettablequestiontitles(target_id)) or print("ERROR CODE 2.3")
+
+    local requirement = 5
+    local greaterThan = true
+
+    for key,row_id in pairs(target_title)do
+        sa_title = source_answer[source_title[key]] or print("ERROR CODE 2.4")
+        if table_exists(sa_title) then
+            for _,rval in pairs(sa_title)do
+                rval = tonumber(rval)
+                if greaterThan and rval >= requirement then
+                    hidequestion(row_id,true)
+                else rval <= requirement then
+                    hidequestion(row_id,true)
+                end
+            end
+        else
+            hidequestion(row_id,true)
+        end
+    end
 
 end
 
 --IF ITS ONLY OTHERS THEN SKIP TO TERMINATE (has to be an array)
 function terminate_if_only_others(source_id,others_answer,source_answer)
-    
     local c = false
     
     if not term_if_only_others or not others_answer then return end 
@@ -189,7 +210,7 @@ function terminate_if_only_others(source_id,others_answer,source_answer)
     -- THIS IS WHEN ITS A SINGLE ANSWER THEREFORE THE SOURCE ANSWER IS THE SAME AS OTHER ANSWER
     if source_answer == others_answer then c = true end
 
-    if next(source_answer) == nil and others_answer ~= nil then
+    if not(table_exists(source_answer)) and others_answer ~= nil then
         c = true
     end
  
@@ -215,7 +236,7 @@ function source(id)
     end
 	
 	for k,v in pairs(ans) do
-		if string.find(k,"other") then
+		if string.find(k,others_text) then
 			for m,n in pairs(label)do
 				if v == tostring(m) then
 					label[m] = nil
@@ -226,7 +247,7 @@ function source(id)
 
     for key,value in pairs(label) do
         label[key] = strip(value)
-        if string.find(label[key],"others") then
+        if string.find(label[key],others_text) then
 			label[key] = nil
             others_answered = true
         end
@@ -286,71 +307,68 @@ function multi_compare(c,...)
    
     if c then
         if ans >= arg[2] and ans <= arg[3] then
-            -- print('ans:'..ans..' arg[2]:'..arg[2]..' arg[3]:'..arg[3])
             rst = true
         end
     else
         for i=2,(#arg+2) do
             if ans == arg[i] then
-                -- print('ans:'..ans..' arg[2]:'..arg[2])
                 rst = true
                 break
             end
         end
     end
 
-    -- if rst then print ('true') else print('false')end
     return rst
 end
 
-function cmp_multitype(op1, op2)
-    local type1, type2 = type(op1), type(op2)
-    if type1 ~= type2 then --cmp by type
-        return type1 < type2
-    elseif type1 == "number" or type1 == "string" then --type2 is equal to type1
-        return op1 < op2 --comp by default
-    elseif type1 == "boolean" then
-        return op1 == true
-    else
-        return tostring(op1) < tostring(op2) --cmp by address
-    end
-end
+function orderedPairs(t)
 
-function __genOrderedIndex( t )
-    local orderedIndex = {}
-    for key in pairs(t) do
-        table.insert( orderedIndex, key )
-    end
-    table.sort( orderedIndex, cmp_multitype )
-    return orderedIndex
-end
-
-function orderedNext(t, state)
-    local key = nil
-    --print("orderedNext: state = "..tostring(state) )
-    if state == nil then
-        -- the first time, generate the index
-        t.__orderedIndex = __genOrderedIndex( t )
-        key = t.__orderedIndex[1]
-    else
-        -- fetch the next value
-        for i = 1,#t.__orderedIndex do
-            if t.__orderedIndex[i] == state then
-                key = t.__orderedIndex[i+1]
-            end
+    function cmp_multitype(op1, op2)
+        local type1, type2 = type(op1), type(op2)
+        if type1 ~= type2 then --cmp by type
+            return type1 < type2
+        elseif type1 == "number" or type1 == "string" then --type2 is equal to type1
+            return op1 < op2 --comp by default
+        elseif type1 == "boolean" then
+            return op1 == true
+        else
+            return tostring(op1) < tostring(op2) --cmp by address
         end
     end
-
-    if key then
-        return key, t[key]
+    
+    function __genOrderedIndex( t )
+        local orderedIndex = {}
+        for key in pairs(t) do
+            table.insert( orderedIndex, key )
+        end
+        table.sort( orderedIndex, cmp_multitype )
+        return orderedIndex
     end
-
-    -- no more value to return, cleanup
-    t.__orderedIndex = nil
-    return
-end
-
-function orderedPairs(t)
+    
+    function orderedNext(t, state)
+        local key = nil
+        --print("orderedNext: state = "..tostring(state) )
+        if state == nil then
+            -- the first time, generate the index
+            t.__orderedIndex = __genOrderedIndex( t )
+            key = t.__orderedIndex[1]
+        else
+            -- fetch the next value
+            for i = 1,#t.__orderedIndex do
+                if t.__orderedIndex[i] == state then
+                    key = t.__orderedIndex[i+1]
+                end
+            end
+        end
+    
+        if key then
+            return key, t[key]
+        end
+    
+        -- no more value to return, cleanup
+        t.__orderedIndex = nil
+        return
+    end
     return orderedNext, t, nil
 end
 
@@ -360,6 +378,10 @@ function recurs_merge(...)
     	arr = array_merge(arr,arg[i])
     end
   	return arr
+end
+
+function table_exists(arr)
+    return next(arr) or nil
 end
 
 main()

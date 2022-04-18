@@ -155,8 +155,8 @@ function pipe_mcq_to_grid(source_id,target_id)
     others_answered = false
     local target_options = array_flip(gettablequestiontitles(target_id)) or print("ERROR CODE 1.1")
 
-    local src_ans, src_ans_label     = source(source_id) or print("ERROR CODE 1.2")
-    local sec_src_ans, sec_ans_label = source(secondary_source_id) or print("ERROR CODE 1.3")
+    local src_ans, src_ans_label     = source(source_id)
+    local sec_src_ans, sec_ans_label = source(secondary_source_id)
 
     --------------------------------------------------------------------
     for row_title,row_id in pairs(target_options)do

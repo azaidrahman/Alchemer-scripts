@@ -16,8 +16,6 @@ greaterThan = true
 
 -- MCQ -> MCQ : 0 || MCQ -> grid : 1 || grid -> grid : 2 || grid -> MCQ : 3 || sandbox : 99
 
-
-
 PAGES_ID = [[
     next 46
     current auto
@@ -28,7 +26,7 @@ PAGES_ID = [[
 function main()    
     local source_id           = 10
     local target_id           = 11
-    secondary_source_id       = 9
+    secondary_source_id       = 0
 
     from_grid = pipe_column and true or false --ternary operator for lua, basically meaning if pipe_column is true then this variable is true else false
     ------------------------------------------------------------
@@ -107,8 +105,8 @@ function pipe_mcq_to_mcq(source_id,target_id)
     
     -- IF THERES ONLY 1 OTHERS FROM A RADIO BUTTON, THEN SEND TO TERMINATE IF SETTING "term_if_only_others" is true
     terminate_if_only_others(source_id, others_answer, source_answer)
-
     -- LOOP THROUGH ALL THE OPTIONS, ESSENTIALLY HIDE ALL OPTIONS AND UNHIDE IF PASS CONDITIONS
+
     for key,reporting_value in pairs(target_options)do 
         hideoption(target_id, reporting_value, true)
         if in_array(reporting_value, source_answer) then
@@ -155,15 +153,14 @@ function pipe_mcq_to_grid(source_id,target_id)
     others_answered = false
     local target_options = array_flip(gettablequestiontitles(target_id)) or print("ERROR CODE 1.1")
 
-    local src_ans, src_ans_label     = source(source_id) or print("ERROR CODE 1.2")
-    local sec_src_ans, sec_ans_label = source(secondary_source_id) or print("ERROR CODE 1.3")
-
+    local src_ans, src_ans_label     = source(source_id)
+    local sec_src_ans, sec_ans_label = source(secondary_source_id)
     --------------------------------------------------------------------
     for row_title,row_id in pairs(target_options)do
         if pipe_row then
             row_title = strip(row_title) or print("ERROR CODE 1.4")
             hidequestion(row_id,true)
-            if in_array(row_title,src_ans_label) then
+            if in_array(row_title,src_ans_label) or (others_answered and row_title:find(strip("option value")))  then
                 hidequestion(row_id,false)
             end
 
@@ -200,6 +197,28 @@ function pipe_grid_to_grid(source_id,target_id)
         end
     end
 end
+
+-- function pipe_grid_to_mcq(source_id,target_id)
+--     local source_answer = getvalue(source_id) or print("ERROR CODE 2.1")
+--     local source_title = array_flip(gettablequestiontitles(source_id)) or print("ERROR CODE 2.2")
+--     local target_title = getquestionoptions(target_id,"Reporting") or print("ERROR CODE 2.3")
+
+
+--     for key,row_id in pairs(target_title)do
+--         sa_title = source_answer[source_title[key]] or print("ERROR CODE 2.4")
+--         hidequestion(row_id,true)
+--         if table_exists(sa_title) then
+--             for _,rval in pairs(sa_title)do
+--                 rval = tonumber(rval) or print"ERROR CODE 2.5"
+--                 if greaterThan and rval >= requirement then
+--                     hidequestion(row_id,false)
+--                 elseif not(greaterThan) and rval <= requirement then
+--                     hidequestion(row_id,false)
+--                 end
+--             end
+--         end
+--     end
+-- end
 
 --IF ITS ONLY OTHERS THEN SKIP TO TERMINATE (has to be an array)
 function terminate_if_only_others(source_id,others_answer,source_answer)

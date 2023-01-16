@@ -198,27 +198,27 @@ function pipe_grid_to_grid(source_id,target_id)
     end
 end
 
--- function pipe_grid_to_mcq(source_id,target_id)
---     local source_answer = getvalue(source_id) or print("ERROR CODE 2.1")
---     local source_title = array_flip(gettablequestiontitles(source_id)) or print("ERROR CODE 2.2")
---     local target_title = getquestionoptions(target_id,"Reporting") or print("ERROR CODE 2.3")
+function pipe_grid_to_mcq(source_id,target_id)
+    local source_answer = getvalue(source_id) or print("ERROR CODE 2.1")
+    local source_title = array_flip(gettablequestiontitles(source_id)) or print("ERROR CODE 2.2")
+    local target_title = getquestionoptions(target_id,"Reporting") or print("ERROR CODE 2.3")
 
 
---     for key,row_id in pairs(target_title)do
---         sa_title = source_answer[source_title[key]] or print("ERROR CODE 2.4")
---         hidequestion(row_id,true)
---         if table_exists(sa_title) then
---             for _,rval in pairs(sa_title)do
---                 rval = tonumber(rval) or print"ERROR CODE 2.5"
---                 if greaterThan and rval >= requirement then
---                     hidequestion(row_id,false)
---                 elseif not(greaterThan) and rval <= requirement then
---                     hidequestion(row_id,false)
---                 end
---             end
---         end
---     end
--- end
+    for key,row_id in pairs(target_title)do
+        sa_title = source_answer[source_title[key]] or print("ERROR CODE 2.4")
+        hidequestion(row_id,true)
+        if table_exists(sa_title) then
+            for _,rval in pairs(sa_title)do
+                rval = tonumber(rval) or print"ERROR CODE 2.5"
+                if greaterThan and rval >= requirement then
+                    hidequestion(row_id,false)
+                elseif not(greaterThan) and rval <= requirement then
+                    hidequestion(row_id,false)
+                end
+            end
+        end
+    end
+end
 
 --IF ITS ONLY OTHERS THEN SKIP TO TERMINATE (has to be an array)
 function terminate_if_only_others(source_id,others_answer,source_answer)

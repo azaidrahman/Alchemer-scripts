@@ -157,7 +157,6 @@ function pipe_mcq_to_grid(source_id,target_id)
     local src_ans, src_ans_label     = source(source_id)
     local sec_src_ans, sec_ans_label = source(secondary_source_id)
     local target_options_flipped = manual_arr_flip(target_options_skus)
-    print(target_options_flipped)
     
     ------------------------------------------------------------------
     for row_title,row_id in pairs(target_options)do

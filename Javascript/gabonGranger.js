@@ -23,14 +23,14 @@ function init(version,prodType,n){
     let currentQuesText = document.getElementById(version+n)
     let randomNumber = currentHidden.value;
     let price = PRICES[prodType]
-    currentQuesText.innerHTML = "RM "+price[randomNumber-1];
+    currentQuesText.innerHTML = "RM "+price[randomNumber-1]; 
 }
   
 function setPrice(version,prodType,n,isYes){
 
     let currentHidden = document.getElementById(BASE+PAGE + hiddens[prodType][n]+"-element")
     let nextHidden = document.getElementById(BASE+PAGE+ hiddens[prodType][n+1]+"-element")
-    let nextQuesText = document.getElementById(version+(n+1))
+    let nextQuesText = document.getElementById(version+(n+1)) 
     
     let price = PRICES[prodType]    
     let randomNumber = isYes ? currentHidden.value*1 + 1 : currentHidden.value*1 - 1

@@ -20,7 +20,7 @@ PAGES_ID = [[
     next 46
     current auto
     thankyou 2
-    terminate 3
+    terminate 3 
 ]]
 
 function main()    

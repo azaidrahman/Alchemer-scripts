@@ -1,14 +1,15 @@
 --Made by Zaid 2021 (azaidrahman@gmail.com)
 
 --SETTINGS
-PIPE_TYPE           = 0                  -- Refer to PIPE_TYPE below to use which code to pipe circumstance       
-pipe_from_others    = false              -- Piping previous input from others into current question ( true / false )           
+PIPE_TYPE           = 1                  -- Refer to PIPE_TYPE below to use which code to pipe circumstance       
+pipe_from_others    = true              -- Piping previous input from others into current question ( true / false )           
 jump_if_only_one    = false              -- Autocode the answer if theres only one and jump into next question (if true enter the page id inside PAGES_ID) ( true / false )           
 term_if_only_others = true               -- Terminate if theres only others answered ( true / false )
 
 --FOR GRID QUESTIONS (CODE:1)
-pipe_row            = false              -- If you are piping to target table and piping into rows
+pipe_row            = true              -- If you are piping to target table and piping into rows
 pipe_column         = false              -- If you are piping to target table and piping into columns
+others_pos          = 5
 
 --FOR GRID TO GRID (CODE:2)
 requirement = 3
@@ -24,8 +25,8 @@ PAGES_ID = [[
 ]]
 
 function main()    
-    local source_id           = 10
-    local target_id           = 11
+    local source_id           = 3
+    local target_id           = 12
     secondary_source_id       = 0
 
     from_grid = pipe_column and true or false --ternary operator for lua, basically meaning if pipe_column is true then this variable is true else false
@@ -108,9 +109,9 @@ function pipe_mcq_to_mcq(source_id,target_id)
     -- LOOP THROUGH ALL THE OPTIONS, ESSENTIALLY HIDE ALL OPTIONS AND UNHIDE IF PASS CONDITIONS
 
     for key,reporting_value in pairs(target_options)do 
-        hideoption(target_id, reporting_value, true)
-        if in_array(reporting_value, source_answer) then
-            hideoption(target_id, reporting_value, false)
+        -- hideoption(target_id, reporting_value, false)
+        if not(in_array(reporting_value, source_answer)) then
+            hideoption(target_id, reporting_value, true)
 
             -- AUTOCODE THE ANSWERS BESIDE "NONE"
             if reporting_value ~= EXCLUDE_OPTIONS["none"] then
@@ -152,20 +153,31 @@ function pipe_mcq_to_grid(source_id,target_id)
 
     others_answered = false
     local target_options = array_flip(gettablequestiontitles(target_id)) or print("ERROR CODE 1.1")
-
+    local target_options_skus = gettablequestionskus(target_id) or print("ERROR CODE 1.1")
     local src_ans, src_ans_label     = source(source_id)
     local sec_src_ans, sec_ans_label = source(secondary_source_id)
-    --------------------------------------------------------------------
+    local target_options_flipped = manual_arr_flip(target_options_skus)
+    print(target_options_flipped)
+    
+    ------------------------------------------------------------------
     for row_title,row_id in pairs(target_options)do
+        --TODO: make an array of id's of rows that passed 
         if pipe_row then
-            row_title = strip(row_title) or print("ERROR CODE 1.4")
-            hidequestion(row_id,true)
-            if in_array(row_title,src_ans_label) or (others_answered and row_title:find(strip("option value")))  then
+            -- row_title = strip(row_title) or print("ERROR CODE 1.4")
+            -- hidequestion(row_id,true)
+            -- if in_array(row_title,src_ans_label) or (others_answered and row_title:find(strip("option value")))  then
+            --     hidequestion(row_id,false)
+            -- end
+            local current_val = target_options_flipped[row_id]
+            if not(in_array(current_val,src_ans)) then 
+                hidequestion(row_id,true)
+            end
+            
+            if pipe_from_others and current_val == others_pos then
                 hidequestion(row_id,false)
             end
 
         end
-        --TODO: make an array of id's of rows that passed 
         if pipe_column then
             if not(pipe_row) then
                 pipe_mcq_to_mcq(source_id, row_id)
@@ -401,6 +413,14 @@ end
 
 function table_exists(arr)
     return next(arr) or nil
+end
+
+function manual_arr_flip(arr)
+    local rst = {}
+    for k,v in pairs(arr)do
+        rst[v] = tonumber(k)+1
+    end
+    return rst
 end
 
 main()

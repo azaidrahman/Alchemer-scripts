@@ -1,7 +1,7 @@
 --Made by Zaid 2021 (azaidrahman@gmail.com)
 
 --SETTINGS
-PIPE_TYPE           = 1                  -- Refer to PIPE_TYPE below to use which code to pipe circumstance       
+PIPE_TYPE           = 0                  -- Refer to PIPE_TYPE below to use which code to pipe circumstance       
 pipe_from_others    = true              -- Piping previous input from others into current question ( true / false )           
 jump_if_only_one    = false              -- Autocode the answer if theres only one and jump into next question (if true enter the page id inside PAGES_ID) ( true / false )           
 term_if_only_others = true               -- Terminate if theres only others answered ( true / false )
@@ -103,6 +103,8 @@ function pipe_mcq_to_mcq(source_id,target_id)
         end
         table.insert(source_answer, getvalue(source_id)) --IF ITS ONLY 1 OTHERS, TERMINATE_IF_ONLY_OTHERS ALREADY TAKES CARE OF THIS
     end
+
+    -- print(source_answer)
     
     -- IF THERES ONLY 1 OTHERS FROM A RADIO BUTTON, THEN SEND TO TERMINATE IF SETTING "term_if_only_others" is true
     terminate_if_only_others(source_id, others_answer, source_answer)
@@ -156,7 +158,7 @@ function pipe_mcq_to_grid(source_id,target_id)
     local target_options_skus = gettablequestionskus(target_id) or print("ERROR CODE 1.1")
     local src_ans, src_ans_label     = source(source_id)
     local sec_src_ans, sec_ans_label = source(secondary_source_id)
-    local target_options_flipped = manual_arr_flip(target_options_skus)
+    local target_options_ordered = order_rows(target_options_skus)
     
     ------------------------------------------------------------------
     for row_title,row_id in pairs(target_options)do
@@ -167,12 +169,12 @@ function pipe_mcq_to_grid(source_id,target_id)
             -- if in_array(row_title,src_ans_label) or (others_answered and row_title:find(strip("option value")))  then
             --     hidequestion(row_id,false)
             -- end
-            local current_val = target_options_flipped[row_id]
+            local current_val = target_options_ordered[row_id]
             if not(in_array(current_val,src_ans)) then 
                 hidequestion(row_id,true)
             end
             
-            if pipe_from_others and current_val == others_pos then
+            if pipe_from_others and current_val == x then
                 hidequestion(row_id,false)
             end
 
@@ -418,6 +420,27 @@ function manual_arr_flip(arr)
     local rst = {}
     for k,v in pairs(arr)do
         rst[v] = tonumber(k)+1
+    end
+    return rst
+end
+
+function order_rows(arr)
+    local rst = {}
+    local min,max
+    for k,v in pairs(arr)do
+        local qid = tonumber(v)	
+          if not min or qid < min then
+            min = qid
+          end
+          if not max or qid > max then
+            max = qid
+          end
+    end
+
+    local ite = 1
+    for i=min,max do
+          rst[i] = ite
+          ite = ite + 1
     end
     return rst
 end

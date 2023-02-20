@@ -7,7 +7,7 @@ filename = arguments[1]
 df = pd.read_excel(filename)
 
 vendors = df['BCID'].unique()
-valid_vendors = ['paneland','cint','pspec','gvr','offline','philo']
+valid_vendors = ['paneland','cint','pspec','gvr','offline','philomath']
 sub = 'EXPORT'
 newfile = filename.replace(sub,'')
 newfile_text = newfile.replace('.xlsx','')
@@ -18,7 +18,7 @@ for vendor in vendors:
     if vendor in valid_vendors:
         id[vendor] = df.loc[(df["Status"] == "Complete") & (df["BCID"] == vendor), ['BRID']]
         id_count = int(id[vendor].count())
-        print(id_count)
+        print(f'{vendor}: {id_count}')
         id[vendor]["Response ID"] = df.loc[(df["Status"] == "Complete") & (df["BCID"] == vendor), ['Response ID']]
 
         counts = df.loc[df['BCID'] == vendor,['Status']].value_counts()

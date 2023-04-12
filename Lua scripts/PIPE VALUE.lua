@@ -77,6 +77,8 @@ function pipe_mcq_to_mcq(source_id,target_id)
     local autocode_answers = {}
     local others_answer = nil
     local others_key = nil
+
+    local hidden_value = 0
     
     --SEPARATE OTHERS TO RESOLVE EDGE CASE OF OTHERS BEING A NUMBER AND CONSIDERED AS REPORTING VALUE
     -- For checkbox
@@ -114,10 +116,11 @@ function pipe_mcq_to_mcq(source_id,target_id)
         -- hideoption(target_id, reporting_value, false)
         if not(in_array(reporting_value, source_answer)) then
             hideoption(target_id, reporting_value, true)
+            hidden_value = hidden_value + 1
 
             -- AUTOCODE THE ANSWERS BESIDE "NONE"
             if reporting_value ~= EXCLUDE_OPTIONS["none"] then
-                if not(pipe_from_others) and is_others_reporting_value(reporting_value) then  
+                if not(pipe_from_others) and reporting_value == EXCLUDE_OPTIONS["others"] then  
                     -- break
                 else
                     autocode_answers[key] = reporting_value
@@ -126,8 +129,8 @@ function pipe_mcq_to_mcq(source_id,target_id)
         end
 
         -- In case of others
-        if ( (pipe_from_others and is_others_reporting_value(reporting_value) and others_answer ~= nil) -- This case is if its piped from previous question
-            or (not pipe_from_others and is_others_reporting_value(reporting_value))) then -- This case is if respondent needs to input the others
+        if ( (pipe_from_others and reporting_value == EXCLUDE_OPTIONS["others"] and others_answer ~= nil) -- This case is if its piped from previous question
+            or (not pipe_from_others and reporting_value == EXCLUDE_OPTIONS["others"])) then -- This case is if respondent needs to input the others
                 hideoption(target_id, reporting_value, false)
         end
 
@@ -146,6 +149,10 @@ function pipe_mcq_to_mcq(source_id,target_id)
             end
             jumptopage(pages["next"])
         end
+    end
+
+    if hidden_value == count(target_options) then
+        jumptopage(pages["next"])
     end
 end
 
@@ -174,7 +181,7 @@ function pipe_mcq_to_grid(source_id,target_id)
                 hidequestion(row_id,true)
             end
             
-            if pipe_from_others and current_val == others_pos then
+            if pipe_from_others and others_answered and current_val == others_pos then
                 hidequestion(row_id,false)
             end
 
@@ -448,11 +455,6 @@ function order_rows(arr)
     end
     return rst
 end
-
-a = 97
-b = 197
-c = 1297
-  
 function is_others_reporting_value(num)
 	local val = tonumber(num)
   	if not(val) then return false end

@@ -67,21 +67,25 @@ const getElemByQid = (qid, section = "element") => {
   return elem;
 };
 
-const t = 482;
-// function getSkuByValue(qid,v){
-//   const RV = getReportingValuesByQid(qid)
-//   for(let key in object){
-//     if (object)
-//   }
-// }
+const t = 351;
+
+function getSkuByValue(qid, v) {
+  const RV = getReportingValuesByQid(qid);
+  for (let i = 0; i < RV.length; i++) {
+    if (+RV[i].value === v) {
+      return RV[i].key;
+    }
+  }
+}
 
 $SG(function () {
   let language = getLang();
+
   if (language.includes("en")) {
-    setCheckedByQid(t, 11587);
+    setCheckedByQid(t, getSkuByValue(t, 1));
   } else if (language.includes("ms")) {
-    setCheckedByQid(t, 11589);
+    setCheckedByQid(t, getSkuByValue(t, 2));
   } else if (language.includes("zh")) {
-    setCheckedByQid(t, 11588);
+    setCheckedByQid(t, getSkuByValue(t, 3));
   }
 });
